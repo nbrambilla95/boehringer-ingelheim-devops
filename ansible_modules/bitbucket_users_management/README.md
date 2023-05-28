@@ -41,21 +41,14 @@ This module can be incorporated within your Ansible playbook as demonstrated bel
 ```
 
 ## Module Parameters
-`user_email` (str, required): Email of the user whose permissions will be changed.
-
-`repository` (str, required): Name of the repository.
-
-`project` (str, required): Name of the project.
-
-`state` (str, required): Desired state for the user, 'present' to add, 'absent' to remove.
-
-`username` (str, required): Bitbucket username.
-
-`password` (str, required): Bitbucket password.
-
-`role` (str, optional): Role to assign to the user. Can be 'REPO_WRITE', 'REPO_READ', 'REPO_ADMIN'. Default is 'REPO_WRITE'.
-
-`url` (str, optional): URL where requests will be made to the Bitbucket API. Default is 'https://bitbucket.com/rest/api/1.0/projects/'.
+- `user_email` (str, required): Email of the user whose permissions will be changed.
+- `repository` (str, required): Name of the repository.
+- `project` (str, required): Name of the project.
+- `state` (str, required): Desired state for the user, 'present' to add, 'absent' to remove.
+- `username` (str, required): Bitbucket username.
+- `password` (str, required): Bitbucket password.
+- `role` (str, optional): Role to assign to the user. Can be 'REPO_WRITE', 'REPO_READ', 'REPO_ADMIN'. Default is 'REPO_WRITE'.
+- `url` (str, optional): URL where requests will be made to the Bitbucket API. Default is 'https://bitbucket.com/rest/api/1.0/projects/'.
 
 ## Return Values
 `message` (str): A message indicating the outcome of the operation.
