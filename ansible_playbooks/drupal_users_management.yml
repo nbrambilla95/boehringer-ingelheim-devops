@@ -1,0 +1,99 @@
+- hosts: all #To be defined or passed by rundeck
+  gather_facts: false
+  vars:
+    user_roles: ['administrator','cms_administrator']
+    project_name: "example-project"
+    branch: "example-branch"
+
+  tasks:
+    - name: "Prepare user roles for SQL query"
+      set_fact:
+        formatted_user_roles: "{{ user_roles | join('\", \"') }}"
+
+    - name: "Get users with specific roles: {{ user_roles }}"
+      shell: >-
+        ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush sqlq "SELECT u.name FROM users_field_data u LEFT JOIN user__roles ur ON u.uid = ur.entity_id WHERE u.status = 1 AND ur.roles_target_id IN (\"{{formatted_user_roles}}\");"'
+      retries: 3
+      delay: 10
+      until: not get_user_list_with_role.failed
+      register: get_user_list_with_role
+
+    - fail:
+        msg: "Fail"
+
+    - name: "Block users with specific roles: {{ user_roles }}"
+      shell: >-
+        ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush user-block "{{ users_with_role_to_block }}"'
+      vars:
+        users_with_role_to_block: "{{ get_user_list_with_role.stdout_lines | join(',') }}"
+      retries: 3
+      delay: 10
+      until: not block_users_with_role_action.failed
+      register: block_users_with_role_action
+      when: get_user_list_with_role.stdout_lines | length > 0
+
+    - name: "Get admin username"
+      shell: >-
+        ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush sqlq "SELECT name FROM users_field_data WHERE uid = 1"'
+      retries: 3
+      delay: 10
+      until: not get_admin_name.failed and get_admin_name.stdout != ""
+      register: get_admin_name
+    
+    - name: "Execute if admin exists"
+      block:
+
+      - name: "Update username"
+        shell: >-
+          ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush sqlq "UPDATE users_field_data SET name = \"{{ new_admin_username }}\" WHERE uid = 1"'
+        delay: 10
+        retries: 3
+        until: not update_username.failed
+        register: update_username
+
+      - name: Update admin password
+        shell: >-
+          ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush upwd "{{ get_admin_name.stdout }}" --password="{{ new_password }}"'
+        vars:
+          new_password: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+        retries: 3
+        delay: 10
+        until: not admin_password_changed.failed
+        register: admin_password_changed
+        no_log: True
+
+      - name: "Changing admin email address"
+        shell: >-
+          ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush sqlq "UPDATE users_field_data SET mail = \"{{ new_admin_email }}\" WHERE uid = 1"'
+        delay: 10
+        retries: 3
+        until: not update_admin_user_email.failed
+        register: update_admin_user_email
+      
+      when: get_admin_name.stdout != ""
+
+    - name: "Clean Drupal cache"
+      shell: >-
+        ssh -o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 32222 {{ project_name }}-{{ branch }}@ssh.example-host 'drush cr'
+      delay: 10
+      retries: 3
+      until: not clean_drupal_cache.failed
+      register: clean_drupal_cache
+
+    - name: "Sending notification"
+      include_role:
+        name: messenger
+      vars:
+        channel: email
+        type: Operational
+        subject: "[WebPro] Drupal Users Management - Project: {{ project_name }}"
+        body: |
+          <p>Drupal Users Management Completed</p></br>
+          <b>Project:</b> {{ project_name }}</br>
+          <b>Branch:</b> {{ branch }}</br>
+          <b>Roles:</b> {{ user_roles }}</br>
+          <b>Users blocked:</b>{{ get_user_list_with_role.stdout_lines | join(',') }}</br>
+        email_to: "{{ notify_email }}"
+        payload:
+          cc: devops-email@example-domain.com
+      when: notify_email is defined
