@@ -31,7 +31,7 @@ ansible-playbook playbook.yml -i hosts
 ```
 
 **Variables**
-```markdown
+
 ## Variables
 
 This playbook uses the following variables:
