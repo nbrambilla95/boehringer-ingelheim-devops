@@ -30,8 +30,6 @@ This playbook is meant to be run with Ansible. You can use the following command
 ansible-playbook playbook.yml -i hosts
 ```
 
-**Variables**
-
 ## Variables
 
 This playbook uses the following variables:
