@@ -1,0 +1,12 @@
+---
+- hosts: all #To be defined or passed by rundeck
+  gather_facts: false
+  
+  tasks:
+  - name: "Testing module"
+    bitbucket_user_management:
+      user_email: "im_an_email@gmail.com"
+      repository: "some-repo"
+      state: "absent"
+      username: "im_an_user@gmail.com"
+      password: "im_a_password"
