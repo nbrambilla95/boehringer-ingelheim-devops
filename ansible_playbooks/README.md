@@ -42,3 +42,15 @@ This playbook uses the following variables:
 - `notify_email`: The email address to send notifications to.
 
 Please note that sensitive data (such as usernames, passwords, and email addresses) should be stored securely, typically in a vault.
+
+## Tasks
+
+The playbook consists of the following main tasks:
+
+1. Prepare user roles for SQL query
+2. Get users with specific roles
+3. Block users with specific roles
+4. Get admin username
+5. Update username, password, and email of the admin user
+6. Clean Drupal cache
+7. Send notification
