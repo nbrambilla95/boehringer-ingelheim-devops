@@ -29,3 +29,18 @@ This playbook is meant to be run with Ansible. You can use the following command
 ```bash
 ansible-playbook playbook.yml -i hosts
 ```
+
+**Variables**
+```markdown
+## Variables
+
+This playbook uses the following variables:
+
+- `user_roles`: Array of user roles to manage. Example: ['administrator','cms_administrator']
+- `project_name`: The name of your Drupal project.
+- `branch`: The specific branch of your project.
+- `new_admin_username`: The new username for the admin account (random value).
+- `new_admin_email`: The new email for the admin account (random value).
+- `notify_email`: The email address to send notifications to.
+
+Please note that sensitive data (such as usernames, passwords, and email addresses) should be stored securely, typically in a vault.
