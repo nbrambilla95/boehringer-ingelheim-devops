@@ -49,3 +49,7 @@ This module can be incorporated within your Ansible playbook as demonstrated bel
 `password` (str, required): Bitbucket password.
 `role` (str, optional): Role to assign to the user. Can be 'REPO_WRITE', 'REPO_READ', 'REPO_ADMIN'. Default is 'REPO_WRITE'.
 `url` (str, optional): URL where requests will be made to the Bitbucket API. Default is 'https://bitbucket.com/rest/api/1.0/projects/'.
+
+## Return Values
+`message` (str): A message indicating the outcome of the operation.
+`changed` (bool): A boolean value indicating whether any changes were made.
