@@ -38,4 +38,4 @@ This module can be incorporated within your Ansible playbook as demonstrated bel
         username: "bitbucket_username"
         password: "bitbucket_password"
         role: "WRITE"
-        ```
+       
